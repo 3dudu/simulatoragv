@@ -28,6 +28,9 @@ public class AGVDecoder  extends CumulativeProtocolDecoder {
 			a = in.getUnsigned();
 			if (a == AGVBaseMsg.MSG_HEAD_2) {
 				int cmdcode = in.getUnsigned();
+				if(cmdcode==0XDE){
+					mLog.debug("decode msg:" + cmdcode);
+				}
 				int msgseq = in.getUnsignedShort();
 				int msglegth = in.getUnsignedShort();
 				if (in.remaining() >= msglegth + 1) {

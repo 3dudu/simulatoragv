@@ -9,7 +9,7 @@ public class AGVCar {
 	private static final int SPEED_1000 = 1000;
 	private LinkedList<StationPoint> routeList = new LinkedList<StationPoint>();
 	private Thread worker;
-	private static Object lock = new Object();
+	private Object lock = new Object();
 	private int taskStatus;
 	private int isClose = 0;;
 	private IoSession iosession;
@@ -137,9 +137,9 @@ public class AGVCar {
 	
 	public void addRoute(List<StationPoint> routeList) {
 		synchronized (lock) {
-			routeList.clear();
 			setStatus(0x01);
-			routeList.addAll(routeList);
+			this.routeList.clear();
+			this.routeList.addAll(routeList);
 			lock.notify();
 		}
 	}
@@ -234,7 +234,7 @@ public class AGVCar {
 						}
 					}
 					if (routeList.size() == 0) {
-						setStatus(0x02);
+						setStatus(0x00);
 						try {
 							lock.wait();
 							continue;

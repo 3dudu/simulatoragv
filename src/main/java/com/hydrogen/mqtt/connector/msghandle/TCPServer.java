@@ -118,7 +118,7 @@ public class TCPServer {
             IoBuffer.setUseDirectBuffer(false);
             IoBuffer.setAllocator(new SimpleBufferAllocator());
         }
-        
+        int carid = 1;
         IoProcessor<NioSession> processor = new SimpleIoProcessorPool<NioSession>(NioProcessor.class,processorThreads);
         IoAcceptor acceptor = new NioSocketAcceptor(processor);
 
@@ -130,7 +130,7 @@ public class TCPServer {
 		
 		acceptor.getFilterChain().addAfter("threadPool","keepAliveFilter", keepAliveFilter);
 		
-		acceptor.setHandler(new AGVMessageHandle(idletime,white));
+		acceptor.setHandler(new AGVMessageHandle(idletime,white,carid));
 		acceptor.getSessionConfig().setReadBufferSize(1024);
 		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, timeout);
 		acceptor.bind(new InetSocketAddress(port));

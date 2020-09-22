@@ -9,8 +9,7 @@ public class House {
     public static ConcurrentHashMap<Integer, AGVCar> carmap = new ConcurrentHashMap<Integer, AGVCar>();
 
     public static int addCar(AGVCar car) {
-    	int carid = caridAtomic.addAndGet(1);
-    	car.setId(carid);
+    	int carid = car.getId();
     	System.out.println("car :"+carid+" work!");
     	carmap.put(carid, car);
     	return carid;

@@ -18,10 +18,13 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 
 	private int idletime;
 	
+	private int carid;
+	
 	private String[] white ;
 
-	public AGVMessageHandle(int idletime , String[] white) {
+	public AGVMessageHandle(int idletime , String[] white,int carid) {
 		super();
+		this.carid = carid;
 		this.idletime = idletime;
 		this.white = white;
 	}
@@ -106,7 +109,7 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 		//否则，交给消息Handler去处理
 		int msgId = packet.msgCmd().getCmd();
 		AGVMsgHandler handler = AGVMsgHandlerContext.getHandler(msgId);
-	
+		session.setAttribute("carid", carid);
 		if(null == handler){
 			System.out.println("没有注册消息处理器");
 			return null;

@@ -13,8 +13,8 @@ public abstract class AGVMsgHandler<T extends AGVMsgInterface> {
 
 	
 	public AGVCar initCar(T italkmsg,IoSession session) {
+		int carid = (int)session.getAttribute("carid");
 		if(null!=session.getAttribute("carid")) {
-			int carid = (int)session.getAttribute("carid");
 			AGVCar car = House.getCar(carid);
 			if(car!=null) {
 				return car;
@@ -22,9 +22,9 @@ public abstract class AGVMsgHandler<T extends AGVMsgInterface> {
 		}
 		
 		AGVCar car = new AGVCar();
+    	car.setId(carid);
 		House.addCar(car);
 		car.init();
-		car.start();
 		session.setAttribute("carid", car.getId());
 		return car;
 	}

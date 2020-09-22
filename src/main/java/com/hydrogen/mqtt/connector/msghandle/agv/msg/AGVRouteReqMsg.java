@@ -52,7 +52,7 @@ public class AGVRouteReqMsg  extends AGVBaseMsg{
 			int w = AGVBaseMsg.byteArrToInt(byte_w);
 			point.setW(w);
 			
-			i++;
+			i += 4;
 			point.setSpeed(msgstr[i]&0xFF);
 			
 			i++;
