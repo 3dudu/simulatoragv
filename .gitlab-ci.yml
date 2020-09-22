@@ -22,13 +22,13 @@ build docker:
   image: docker:latest
   stage: buildDocker
   variables:
-    DOCKER_HOST: tcp://192.168.1.185:2375
+    DOCKER_HOST: tcp://192.168.1.144:2375
   script:
     - cd bin
-    - docker build --force-rm -t registry.cn-qingdao.aliyuncs.com/zhujin/tcpserver:1.0 .
-    - docker tag registry.cn-qingdao.aliyuncs.com/zhujin/tcpserver:1.0 dudurpg/tcpserver:1.0
+    - docker build --force-rm -t registry.cn-qingdao.aliyuncs.com/zhujin/simulatoragv:1.0 .
+    - docker tag registry.cn-qingdao.aliyuncs.com/zhujin/simulatoragv:1.0 dudurpg/simulatoragv:1.0
     - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
-    - docker push dudurpg/tcpserver:1.0
+    - docker push dudurpg/simulatoragv:1.0
   dependencies: 
     - build jar
   tags:
@@ -40,9 +40,9 @@ deploy:
   variables:
     DOCKER_HOST: tcp://192.168.1.185:2375
   script:
-    - docker stop tcpserver
-    - docker rm -f tcpserver
-    - docker run -d -p 5151:5151 --name tcpserver registry.cn-qingdao.aliyuncs.com/zhujin/tcpserver:1.0
+    - docker stop simulatoragv
+    - docker rm -f simulatoragv
+    - docker run -d -p 15151:15151 --name simulatoragv registry.cn-qingdao.aliyuncs.com/zhujin/simulatoragv:1.0
   dependencies: 
     - build docker
   tags:

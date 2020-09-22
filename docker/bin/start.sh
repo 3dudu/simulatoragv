@@ -1,6 +1,6 @@
 #!/bin/bash
 
-AppName=mqtt-connector-tcp.jar
+AppName=simulatoragv.jar
 APP_HOME=`pwd`/`dirname $0`
 
 mkdir -p $APP_HOME/logs
