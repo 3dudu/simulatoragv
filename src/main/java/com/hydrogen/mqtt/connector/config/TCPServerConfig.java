@@ -38,9 +38,6 @@ public class TCPServerConfig {
 	@Value("${tcpserver.white}")
 	private String[] white ;
 	
-    @Value("${mqtt.topic}")
-    private String defaultTopic;
-	
 	@Bean("TCPServer")
 	public TCPServer getTCPServer(KeepAliveFilter keepAliveFilter) {
 		AGVMsgHandlerContext.init();
