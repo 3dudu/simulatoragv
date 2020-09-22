@@ -44,7 +44,7 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
-		House.removeCar((int)session.getAttribute("carid"));
+		//House.removeCar((int)session.getAttribute("carid"));
 		super.sessionClosed(session);
 		LOG.info("session has been closed...");
 	}
