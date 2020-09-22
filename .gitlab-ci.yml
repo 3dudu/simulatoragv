@@ -1,0 +1,49 @@
+services:
+  - docker:19.03.7-dind
+
+stages:
+   - build
+   - buildDocker
+   - deploy
+  
+build jar:
+  image: maven:latest
+  stage: build
+  only:
+    - master
+  script: "mvn package -B -Dmaven.test.skip=true"
+  artifacts: 
+    paths:
+      - bin/*
+  tags:
+    - and
+
+build docker: 
+  image: docker:latest
+  stage: buildDocker
+  variables:
+    DOCKER_HOST: tcp://192.168.1.185:2375
+  script:
+    - cd bin
+    - docker build --force-rm -t registry.cn-qingdao.aliyuncs.com/zhujin/tcpserver:1.0 .
+    - docker tag registry.cn-qingdao.aliyuncs.com/zhujin/tcpserver:1.0 dudurpg/tcpserver:1.0
+    - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+    - docker push dudurpg/tcpserver:1.0
+  dependencies: 
+    - build jar
+  tags:
+    - and
+    
+deploy: 
+  image: docker:latest
+  stage: deploy
+  variables:
+    DOCKER_HOST: tcp://192.168.1.185:2375
+  script:
+    - docker stop tcpserver
+    - docker rm -f tcpserver
+    - docker run -d -p 5151:5151 --name tcpserver registry.cn-qingdao.aliyuncs.com/zhujin/tcpserver:1.0
+  dependencies: 
+    - build docker
+  tags:
+    - and
