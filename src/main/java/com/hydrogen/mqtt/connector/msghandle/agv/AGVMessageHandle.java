@@ -8,7 +8,6 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hydrogen.mqtt.connector.car.House;
 import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandler;
 import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandlerContext;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMsgInterface;
@@ -18,13 +17,11 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 
 	private int idletime;
 	
-	private int carid;
 	
 	private String[] white ;
 
-	public AGVMessageHandle(int idletime , String[] white,int carid) {
+	public AGVMessageHandle(int idletime , String[] white) {
 		super();
-		this.carid = carid;
 		this.idletime = idletime;
 		this.white = white;
 	}
@@ -38,7 +35,7 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 			throws Exception {
 		if(message instanceof AGVMsgInterface) {
 			AGVMsgInterface msg = (AGVMsgInterface)message;
-			LOG.info("message send to "+session.getAttribute("ip")+",msg:"+msg.msgCmd());
+			LOG.debug("message send to "+session.getAttribute("ip")+",msg:"+msg.msgCmd());
 		}
 	}
 
@@ -96,7 +93,7 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 	    session.setAttribute("ip", remoteAddress);
 		if(obj instanceof AGVMsgInterface) {
 			AGVMsgInterface msg = (AGVMsgInterface) obj;
-			LOG.info("rec from "+session.getAttribute("ip")+",msg:"+msg.msgCmd());
+			LOG.debug("rec from "+session.getAttribute("ip")+",msg:"+msg.msgCmd());
 			AGVMsgInterface message = processPacket(msg,session);
 			if(message!=null) {
 				session.write(message);
@@ -109,9 +106,8 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 		//否则，交给消息Handler去处理
 		int msgId = packet.msgCmd().getCmd();
 		AGVMsgHandler handler = AGVMsgHandlerContext.getHandler(msgId);
-		session.setAttribute("carid", carid);
 		if(null == handler){
-			System.out.println("没有注册消息处理器");
+			LOG.error("未知消息，没有注册消息处理器");
 			return null;
 		} else {
 			//直接交给消息handler去处理

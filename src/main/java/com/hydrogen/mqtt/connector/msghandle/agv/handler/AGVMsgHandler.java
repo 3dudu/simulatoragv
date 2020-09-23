@@ -7,25 +7,22 @@ import com.hydrogen.mqtt.connector.car.House;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVInfoRspMsg;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMsgInterface;
 
-public abstract class AGVMsgHandler<T extends AGVMsgInterface> {
+public abstract class AGVMsgHandler<T extends AGVMsgInterface>{
 	
-	abstract public AGVMsgInterface handler(T italkmsg,IoSession session);
+	abstract public AGVMsgInterface handler(T packet,IoSession session);
 
 	
 	public AGVCar initCar(T italkmsg,IoSession session) {
-		int carid = (int)session.getAttribute("carid");
-		if(null!=session.getAttribute("carid")) {
-			AGVCar car = House.getCar(carid);
-			if(car!=null) {
-				return car;
-			}
+		int carid = italkmsg.agvid();
+		AGVCar car = House.getCar(carid);
+		if(car!=null) {
+			return car;
 		}
 		
-		AGVCar car = new AGVCar();
+		car = new AGVCar();
     	car.setId(carid);
 		House.addCar(car);
 		car.init();
-		session.setAttribute("carid", car.getId());
 		return car;
 	}
 

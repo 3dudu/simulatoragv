@@ -5,14 +5,14 @@ import java.util.Map;
 
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMsgInterface;
 
-public class AGVMsgHandlerContext {
+public class AGVMsgHandlerContext{
 
 	private static Map<Integer,AGVMsgHandler<? extends AGVMsgInterface>> handlerMap = new HashMap<Integer,AGVMsgHandler<? extends AGVMsgInterface>>();
 	
 	public static AGVMsgHandler<? extends AGVMsgInterface> getHandler(int msgId) {
 		return handlerMap.get(msgId);
 	}
-	public static AGVMsgHandler<? extends AGVMsgInterface> putHandler(AGVMsgHandler<AGVMsgInterface> handler) {
+	public static AGVMsgHandler<? extends AGVMsgInterface> putHandler(AGVMsgHandler<? extends AGVMsgInterface> handler) {
 		return handlerMap.put(handler.getHandlerId(), handler);
 	}
 	public static void init() {

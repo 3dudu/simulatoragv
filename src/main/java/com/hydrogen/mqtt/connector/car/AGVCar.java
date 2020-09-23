@@ -4,8 +4,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.mina.core.session.IoSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AGVCar {
+    private final static Logger LOG = LoggerFactory.getLogger(AGVCar.class);
+
 	private static final int SPEED_1000 = 200;
 	private static final int SPEED = SPEED_1000/8;
 	private LinkedList<StationPoint> routeList = new LinkedList<StationPoint>();
@@ -141,6 +145,7 @@ public class AGVCar {
 			setStatus(0x01);
 			this.routeList.clear();
 			this.routeList.addAll(routeList);
+			LOG.info("car_"+id+",recive new routelist!");
 			lock.notify();
 		}
 	}
@@ -148,7 +153,7 @@ public class AGVCar {
 	public void start() {
 		synchronized (lock) {
 			setStatus(0x01);
-			testdata();
+			//testdata();
 			lock.notify();
 		}
 	}
@@ -157,6 +162,7 @@ public class AGVCar {
 		synchronized (lock) {
 			isClose = 1;
 			routeList.clear();
+			LOG.info("car_"+id+",stop task!");
 			lock.notify();
 		}
 		worker.interrupt();
@@ -166,17 +172,19 @@ public class AGVCar {
 		if(taskStatus==0x03) {
 			this.taskStatus = taskStatus;
 			setStatus(0x03);
+			LOG.info("car_"+id+",pause task!");
 		}else if(taskStatus==0x04) {
 			synchronized (lock) {
 				if(this.taskStatus==0x03) {
 					this.taskStatus = taskStatus;
 					setStatus(0x01);
+					LOG.info("car_"+id+",go on task!");
 					lock.notify();
 				}else{
 					this.taskStatus = taskStatus;
 					setStatus(0x01);
 					routeList.clear();
-					testdata();
+					//testdata();
 					lock.notify();
 				}
 			}
@@ -185,6 +193,7 @@ public class AGVCar {
 			setStatus(0x00);
 			synchronized (lock) {
 				routeList.clear();
+				LOG.info("car_"+id+",stop task!");
 				lock.notify();
 			}
 		}
@@ -235,6 +244,8 @@ public class AGVCar {
 						}
 					}
 					if (routeList.size() == 0) {
+						LOG.info("car_"+id+",routeList empty,stop task!");
+
 						setStatus(0x00);
 						try {
 							lock.wait();

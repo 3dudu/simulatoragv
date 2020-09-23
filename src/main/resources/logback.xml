@@ -59,9 +59,10 @@
 	
 	
 	<!-- 系统模块日志级别控制  -->
-	<logger name="com.hydrogen" level="debug" />
+	<logger name="com.hydrogen" level="info" />
 	<!-- Spring日志级别控制  -->
 	<logger name="org.springframework" level="warn" />
+	<logger name="org.apache" level="warn" />
 
 	<root>
 		<appender-ref ref="console" />

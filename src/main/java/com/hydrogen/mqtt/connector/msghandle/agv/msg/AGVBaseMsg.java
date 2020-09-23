@@ -8,7 +8,21 @@ public abstract class AGVBaseMsg   implements AGVMsgInterface{
 	
 	public static int MSG_HEAD_2 = 0x90;
 	
-    private static int[] CRC8Table = new int[] {
+	private int carid = 0;
+	
+    public int getCarid() {
+		return carid;
+	}
+
+	public void setCarid(int carid) {
+		this.carid = carid;
+	}
+	
+	public int agvid() {
+		return this.carid;
+	}
+
+	private static int[] CRC8Table = new int[] {
             0,94,188,226,97,63,221,131,194,156,126,32,163,253,31,65,
             157,195,33,127,252,162,64,30, 95,1,227,189,62,96,130,220,
             35,125,159,193,66,28,254,160,225,191,93,3,128,222,60,98,

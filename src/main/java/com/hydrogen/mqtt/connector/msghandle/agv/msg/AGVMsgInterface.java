@@ -2,11 +2,14 @@ package com.hydrogen.mqtt.connector.msghandle.agv.msg;
 
 
 public interface AGVMsgInterface {
+	
 	public byte[] encoder();
 	
 	public void decoder(byte[] msgstr);
 	
 	public CMD msgCmd();
+	
+	public int agvid();
 	
 	public enum CMD{
 		CMD_DD(0xDD),
