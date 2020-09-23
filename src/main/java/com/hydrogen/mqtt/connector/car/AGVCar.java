@@ -6,7 +6,8 @@ import java.util.List;
 import org.apache.mina.core.session.IoSession;
 
 public class AGVCar {
-	private static final int SPEED_1000 = 1000;
+	private static final int SPEED_1000 = 200;
+	private static final int SPEED = SPEED_1000/8;
 	private LinkedList<StationPoint> routeList = new LinkedList<StationPoint>();
 	private Thread worker;
 	private Object lock = new Object();
@@ -251,42 +252,44 @@ public class AGVCar {
 
 					if (routeList.size() > 0) {
 						StationPoint nextpoint = routeList.peek();
-						if (curpoint.getX() == nextpoint.getX()) {
+						if ( Math.abs(curpoint.getX() - nextpoint.getX())<100) {
 							int d_y = nextpoint.getY() - curpoint.getY();
 							d_y = Math.abs(d_y);
-							if (d_y > 1000) {
-								while (d_y > 0) {
+							if (d_y > SPEED*4) {
+								while (d_y > SPEED*2) {
 									if (nextpoint.getY() > curpoint.getY()) {
-										setY(getY() + 1000);
+										setY(getY() + SPEED);
 									} else {
-										setY(getY() - 1000);
+										setY(getY() - SPEED);
 									}
-									d_y -= 1000;
+									d_y -= SPEED;
 									try {
 										Thread.sleep(SPEED_1000);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
 								}
+								continue;
 							}
 
-						} else if (curpoint.getY() == nextpoint.getY()) {
+						} else if ( Math.abs(curpoint.getY() - nextpoint.getY())<100 ) {
 							int d_x = nextpoint.getX() - curpoint.getX();
 							d_x = Math.abs(d_x);
-							if (d_x > 2000) {
-								while (d_x > 0) {
+							if (d_x > SPEED*4) {
+								while (d_x > SPEED*2) {
 									if (nextpoint.getX() > curpoint.getX()) {
-										setX(getX() + 1000);
+										setX(getX() + SPEED);
 									} else {
-										setX(getX() - 1000);
+										setX(getX() - SPEED);
 									}
-									d_x -= 1000;
+									d_x -= SPEED;
 									try {
 										Thread.sleep(SPEED_1000);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
 								}
+								continue;
 							}
 						}
 					}
