@@ -235,17 +235,8 @@ public class AGVCar {
 		public void run() {
 			while (isClose == 0) {
 				synchronized (lock) {
-					if (taskStatus == 3) {
-						try {
-							lock.wait();
-							continue;
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
 					if (routeList.size() == 0) {
 						LOG.info("car_"+id+",routeList empty,stop task!");
-
 						setStatus(0x00);
 						try {
 							lock.wait();
@@ -260,20 +251,31 @@ public class AGVCar {
 					setY(curpoint.getY());
 					setW(curpoint.getW());
 					setSpeed(curpoint.getSpeed());
-
+					int speed = SPEED_1000/2;
+					if(curpoint.getSpeed()==0x02) {
+						speed = SPEED_1000 * 7 /10;
+					}
 					if (routeList.size() > 0) {
 						StationPoint nextpoint = routeList.peek();
 						if ( Math.abs(curpoint.getX() - nextpoint.getX())<100) {
 							int d_y = nextpoint.getY() - curpoint.getY();
 							d_y = Math.abs(d_y);
-							if (d_y > SPEED*4) {
-								while (d_y > SPEED*2) {
-									if (nextpoint.getY() > curpoint.getY()) {
-										setY(getY() + SPEED);
-									} else {
-										setY(getY() - SPEED);
+							//if (d_y > SPEED*4) {
+								while (d_y > speed) {
+									if (taskStatus == 3) {
+										try {
+											lock.wait();
+											continue;
+										} catch (InterruptedException e) {
+											e.printStackTrace();
+										}
 									}
-									d_y -= SPEED;
+									if (nextpoint.getY() > curpoint.getY()) {
+										setY(getY() + speed);
+									} else {
+										setY(getY() - speed);
+									}
+									d_y -= speed;
 									try {
 										Thread.sleep(SPEED_1000);
 									} catch (InterruptedException e) {
@@ -281,19 +283,28 @@ public class AGVCar {
 									}
 								}
 								continue;
-							}
+							//}
 
-						} else if ( Math.abs(curpoint.getY() - nextpoint.getY())<100 ) {
+						//} else if ( Math.abs(curpoint.getY() - nextpoint.getY())<100 ) {
+						}else {
 							int d_x = nextpoint.getX() - curpoint.getX();
 							d_x = Math.abs(d_x);
-							if (d_x > SPEED*4) {
-								while (d_x > SPEED*2) {
-									if (nextpoint.getX() > curpoint.getX()) {
-										setX(getX() + SPEED);
-									} else {
-										setX(getX() - SPEED);
+							//if (d_x > SPEED*4) {
+								while (d_x > speed) {
+									if (taskStatus == 3) {
+										try {
+											lock.wait();
+											continue;
+										} catch (InterruptedException e) {
+											e.printStackTrace();
+										}
 									}
-									d_x -= SPEED;
+									if (nextpoint.getX() > curpoint.getX()) {
+										setX(getX() + speed);
+									} else {
+										setX(getX() - speed);
+									}
+									d_x -= speed;
 									try {
 										Thread.sleep(SPEED_1000);
 									} catch (InterruptedException e) {
@@ -301,7 +312,7 @@ public class AGVCar {
 									}
 								}
 								continue;
-							}
+							//}
 						}
 					}
 				}
