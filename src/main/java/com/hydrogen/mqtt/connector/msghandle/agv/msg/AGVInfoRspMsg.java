@@ -34,8 +34,8 @@ public class AGVInfoRspMsg  extends AGVBaseMsg{
 	}
 
 	@Override
-	public CMD msgCmd() {
-		return CMD.CMD_D1;
+	public int msgCmd() {
+		return CMD.CMD_D1.getCmd();
 	}
 	
 	private int status;

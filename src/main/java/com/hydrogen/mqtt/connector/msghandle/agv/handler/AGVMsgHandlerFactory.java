@@ -1,30 +1,48 @@
 package com.hydrogen.mqtt.connector.msghandle.agv.handler;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMsgInterface;
+import com.hydrogen.mqtt.connector.car.AGVCar;
+import com.hydrogen.mqtt.connector.msghandle.AGVMsgHandlerInterface;
+import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
+import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg;
 
-public class AGVMsgHandlerContext{
+public class AGVMsgHandlerFactory extends AbstractMsgHandlerFactory{
+    private final Logger LOG = LoggerFactory.getLogger(AGVMsgHandlerFactory.class);
 
-	private static Map<Integer,AGVMsgHandler<? extends AGVMsgInterface>> handlerMap = new HashMap<Integer,AGVMsgHandler<? extends AGVMsgInterface>>();
 	
-	public static AGVMsgHandler<? extends AGVMsgInterface> getHandler(int msgId) {
-		return handlerMap.get(msgId);
-	}
-	public static AGVMsgHandler<? extends AGVMsgInterface> putHandler(AGVMsgHandler<? extends AGVMsgInterface> handler) {
-		return handlerMap.put(handler.getHandlerId(), handler);
-	}
-	public static void init() {
-		
+	public static AGVMsgHandler<AGVBaseMsg> defaultHandler;
+
+	@Override
+	public void regHandler() {
 		QueryAGVInfoMsgHandler queryAGVInfoMsgHandler = new QueryAGVInfoMsgHandler();
-		handlerMap.put(queryAGVInfoMsgHandler.getHandlerId(), queryAGVInfoMsgHandler);
+		putHandler(queryAGVInfoMsgHandler);
 		
 		RoutReqHandler routReqHandler = new RoutReqHandler();
-		handlerMap.put(routReqHandler.getHandlerId(), routReqHandler);
+		putHandler(routReqHandler);
 		
 		TaskReqHabdler taskReqHabdler = new TaskReqHabdler();
-		handlerMap.put(taskReqHabdler.getHandlerId(), taskReqHabdler);
-		
+		putHandler(taskReqHabdler);		
+	}
+
+	@Override
+	public AGVMsgHandlerInterface defaultHandler() {
+		if(defaultHandler==null) {
+			defaultHandler = new AGVMsgHandler<AGVBaseMsg>() {
+				@Override
+				public int getHandlerId() {
+					return 0;
+				}
+
+				@Override
+				public AGVBaseMsg handler(AGVBaseMsg italkmsg,
+						AGVCar car) {
+					return null;
+				}
+			};
+			LOG.info("No fonud handler, return default AGVMsgHandler.");
+		}
+		return defaultHandler;
 	}
 }

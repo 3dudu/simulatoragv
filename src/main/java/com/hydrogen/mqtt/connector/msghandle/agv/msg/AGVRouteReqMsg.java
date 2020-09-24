@@ -62,8 +62,8 @@ public class AGVRouteReqMsg  extends AGVBaseMsg{
 	}
 
 	@Override
-	public CMD msgCmd() {
-		return CMD.CMD_DE;
+	public int msgCmd() {
+		return CMD.CMD_DE.getCmd();
 	}
 
 }

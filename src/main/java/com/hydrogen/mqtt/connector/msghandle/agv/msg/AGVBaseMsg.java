@@ -2,6 +2,8 @@ package com.hydrogen.mqtt.connector.msghandle.agv.msg;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.hydrogen.mqtt.connector.msghandle.AGVMsgInterface;
+
 public abstract class AGVBaseMsg   implements AGVMsgInterface{
 	
 	public static int MSG_HEAD_1 = 0xEB;
@@ -9,6 +11,23 @@ public abstract class AGVBaseMsg   implements AGVMsgInterface{
 	public static int MSG_HEAD_2 = 0x90;
 	
 	private int carid = 0;
+	
+	public enum CMD{
+		CMD_DD(0xDD),
+		CMD_D1(0xD1),
+		CMD_DF(0xDF),
+		CMD_DE(0xDE);
+		
+		private int cmdcode;
+		CMD(int cmd){
+            this.cmdcode = cmd;
+        }
+
+		public int getCmd() {
+			return cmdcode;
+		}
+		
+	}
 	
     public int getCarid() {
 		return carid;
@@ -41,7 +60,7 @@ public abstract class AGVBaseMsg   implements AGVMsgInterface{
             116,42,200,150,21,75,169,247,182,232,10,84,215,137,107,53 };
 	
 	public AGVBaseMsg(int seq){
-		this.cmd = msgCmd().getCmd();
+		this.cmd = msgCmd();
 		if(seq==0) {
 			seq = nextSeq();
 		}

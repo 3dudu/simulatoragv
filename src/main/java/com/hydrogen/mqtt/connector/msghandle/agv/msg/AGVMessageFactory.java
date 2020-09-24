@@ -1,6 +1,7 @@
 package com.hydrogen.mqtt.connector.msghandle.agv.msg;
 
-import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMsgInterface.CMD;
+import com.hydrogen.mqtt.connector.msghandle.AGVMsgInterface;
+import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg.CMD;
 
 public class AGVMessageFactory {
 

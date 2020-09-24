@@ -9,10 +9,13 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 import org.apache.mina.core.service.IoAcceptor;
+import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.service.IoProcessor;
 import org.apache.mina.core.service.SimpleIoProcessorPool;
 import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.filter.executor.OrderedThreadPoolExecutor;
 import org.apache.mina.filter.keepalive.KeepAliveFilter;
@@ -21,26 +24,13 @@ import org.apache.mina.transport.socket.nio.NioProcessor;
 import org.apache.mina.transport.socket.nio.NioSession;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
-import com.hydrogen.mqtt.connector.msghandle.agv.AGVMessageHandle;
-import com.hydrogen.mqtt.connector.msghandle.agv.codec.AGVCodecFactory;
-
 public class TCPServer {
 	private static int THREAD_NUM = Runtime.getRuntime().availableProcessors()+1;
-
 	private int processorThreads = THREAD_NUM;
 	private int codecThreads = THREAD_NUM;
 	private boolean heapBuffer = true;
-	private int port = 5150;
+	private int port = 15151;
 	private int timeout = 30;
-	private String[] white;
-	
-	public String[] getWhite() {
-		return white;
-	}
-
-	public void setWhite(String... white) {
-		this.white = white;
-	}
 
 	public int getProcessorThreads() {
 		return processorThreads;
@@ -90,17 +80,6 @@ public class TCPServer {
 		}
 	}
 
-	public int getIdletime() {
-		return idletime;
-	}
-
-	public void setIdletime(int idletime) {
-		if(idletime>0) {
-			this.idletime = idletime;
-		}
-	}
-
-	private int idletime = 180;
 
 	private KeepAliveFilter keepAliveFilter;
 	
@@ -112,24 +91,26 @@ public class TCPServer {
 		this.keepAliveFilter = keepAliveFilter;
 	}
 
-	public void start() throws IOException{
+	public void start(ProtocolCodecFactory codecFactory,IoHandlerAdapter handler) throws IOException{
         //是否使用直接缓冲区，比直接缓存区快50%。待测试验证
         if (heapBuffer) {
             IoBuffer.setUseDirectBuffer(false);
             IoBuffer.setAllocator(new SimpleBufferAllocator());
         }
+        if(codecFactory==null) {
+        	codecFactory = new TextLineCodecFactory();
+        }
         IoProcessor<NioSession> processor = new SimpleIoProcessorPool<NioSession>(NioProcessor.class,processorThreads);
         IoAcceptor acceptor = new NioSocketAcceptor(processor);
 
-	//	acceptor.getFilterChain().addLast("codec",new ProtocolCodecFilter(new GPSCodecFactory()));
         acceptor.getFilterChain().addLast("logger",new LoggingFilter());
-		acceptor.getFilterChain().addLast("codec",new ProtocolCodecFilter(new AGVCodecFactory()));
+		acceptor.getFilterChain().addLast("codec",new ProtocolCodecFilter(codecFactory));
 		// 线程池
 		acceptor.getFilterChain().addAfter("codec","threadPool", createExecutorFilter(codecThreads,"AGV TCP Server"));
 		
 		acceptor.getFilterChain().addAfter("threadPool","keepAliveFilter", keepAliveFilter);
 		
-		acceptor.setHandler(new AGVMessageHandle(idletime,white));
+		acceptor.setHandler(handler);
 		acceptor.getSessionConfig().setReadBufferSize(1024);
 		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, timeout);
 		acceptor.bind(new InetSocketAddress(port));

@@ -7,9 +7,9 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hydrogen.mqtt.connector.msghandle.AGVMsgInterface;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMessageFactory;
-import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMsgInterface;
 
 public class AGVDecoder  extends CumulativeProtocolDecoder {
 

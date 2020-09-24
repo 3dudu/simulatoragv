@@ -2,14 +2,19 @@ package com.hydrogen.mqtt.connector.config;
 
 import java.io.IOException;
 
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.keepalive.KeepAliveFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.hydrogen.mqtt.connector.msghandle.AGVMessageHandle;
+import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
 import com.hydrogen.mqtt.connector.msghandle.TCPKeepAliveMessageFactory;
 import com.hydrogen.mqtt.connector.msghandle.TCPServer;
-import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandlerContext;
+import com.hydrogen.mqtt.connector.msghandle.agv.codec.AGVCodecFactory;
+import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandlerFactory;
 
 @Configuration
 public class TCPServerConfig {
@@ -38,16 +43,14 @@ public class TCPServerConfig {
 	@Value("${tcpserver.white}")
 	private String[] white ;
 	
+	
 	@Bean("TCPServer")
-	public TCPServer getTCPServer(KeepAliveFilter keepAliveFilter) {
-		AGVMsgHandlerContext.init();
+	public TCPServer getTCPServer(KeepAliveFilter keepAliveFilter,IoHandlerAdapter messageHandle) {
 		TCPServer server = new TCPServer();
 		server.setPort(port);
-		server.setWhite(white);
 		server.setKeepAliveFilter(keepAliveFilter);
-		
 		try {
-			server.start();
+			server.start(protocolCodecFactory(),messageHandle);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -58,6 +61,24 @@ public class TCPServerConfig {
 	public KeepAliveFilter keepAliveFilter() {
 		KeepAliveFilter kl = new KeepAliveFilter(new TCPKeepAliveMessageFactory(),org.apache.mina.core.session.IdleStatus.BOTH_IDLE);
 		return kl;
+	}
+	
+	@Bean
+	public ProtocolCodecFactory protocolCodecFactory() {
+		return new AGVCodecFactory();
+	}
+	
+	@Bean("msgHandlerFactory")
+	public AbstractMsgHandlerFactory msgHandlerFactory() {
+		return new AGVMsgHandlerFactory();
+	}
+	
+	
+	@Bean("messageHandle")
+	public IoHandlerAdapter messageHandle(AbstractMsgHandlerFactory msgHandlerFactory) {
+		AGVMessageHandle handler = new AGVMessageHandle(idletime,white);
+		handler.register(msgHandlerFactory);
+		return handler;
 	}
 	
 }

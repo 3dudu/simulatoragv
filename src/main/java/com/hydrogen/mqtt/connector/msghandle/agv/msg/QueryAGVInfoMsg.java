@@ -17,8 +17,8 @@ public class QueryAGVInfoMsg extends AGVBaseMsg{
 	}
 
 	@Override
-	public CMD msgCmd() {
-		return CMD.CMD_DD;
+	public int msgCmd() {
+		return CMD.CMD_DD.getCmd();
 	}
 
 	@Override

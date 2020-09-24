@@ -4,16 +4,35 @@ import org.apache.mina.core.session.IoSession;
 
 import com.hydrogen.mqtt.connector.car.AGVCar;
 import com.hydrogen.mqtt.connector.car.House;
+import com.hydrogen.mqtt.connector.msghandle.AGVMsgHandlerInterface;
+import com.hydrogen.mqtt.connector.msghandle.AGVMsgInterface;
+import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVInfoRspMsg;
-import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMsgInterface;
 
-public abstract class AGVMsgHandler<T extends AGVMsgInterface>{
+public abstract class AGVMsgHandler<T extends AGVBaseMsg> implements AGVMsgHandlerInterface{
 	
-	abstract public AGVMsgInterface handler(T packet,IoSession session);
+	@Override
+	public AGVMsgInterface process(AGVMsgInterface taskMsg, IoSession session) {
+		T msg = (T)taskMsg;
+		AGVInfoRspMsg rsp = new AGVInfoRspMsg(msg.getMsgseq());
+		AGVCar car = initCar(msg,session);
+		
+		AGVBaseMsg rsp2 = handler(msg,car);
+		if(rsp2==null) {
+			return getCarInfo(rsp,car);
+		}else {
+			return rsp2;
+		}
+	}
+	
+	public abstract AGVBaseMsg handler(T italkmsg,AGVCar car);
 
 	
-	public AGVCar initCar(T italkmsg,IoSession session) {
+	public AGVCar initCar(AGVBaseMsg italkmsg,IoSession session) {
 		int carid = italkmsg.agvid();
+		if(carid!=0) {
+			session.setAttribute("carid", carid);
+		}
 		AGVCar car = House.getCar(carid);
 		if(car!=null) {
 			return car;
@@ -25,8 +44,6 @@ public abstract class AGVMsgHandler<T extends AGVMsgInterface>{
 		car.init();
 		return car;
 	}
-
-	abstract public int getHandlerId();
 
 	public AGVInfoRspMsg getCarInfo(AGVInfoRspMsg rsp, AGVCar car) {
 		rsp.setStatus(car.getStatus());

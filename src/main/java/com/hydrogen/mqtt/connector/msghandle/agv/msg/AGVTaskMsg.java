@@ -27,8 +27,8 @@ public class AGVTaskMsg extends AGVBaseMsg{
 	}
 
 	@Override
-	public CMD msgCmd() {
-		return CMD.CMD_DF;
+	public int msgCmd() {
+		return CMD.CMD_DF.getCmd();
 	}
 
 

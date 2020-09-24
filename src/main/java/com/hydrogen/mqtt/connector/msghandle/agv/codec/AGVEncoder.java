@@ -27,7 +27,7 @@ public class AGVEncoder extends ProtocolEncoderAdapter {
 
 		buffer.putUnsigned(AGVBaseMsg.MSG_HEAD_1);
 		buffer.putUnsigned(AGVBaseMsg.MSG_HEAD_2);
-		buffer.putUnsigned(msg.msgCmd().getCmd());
+		buffer.putUnsigned(msg.msgCmd());
 		buffer.putUnsignedShort(msg.getMsgseq());
 		if(body!=null && body.length!=0) {
 			buffer.putUnsignedShort(body.length);

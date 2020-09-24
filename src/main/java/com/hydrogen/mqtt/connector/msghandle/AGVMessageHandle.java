@@ -1,4 +1,4 @@
-package com.hydrogen.mqtt.connector.msghandle.agv;
+package com.hydrogen.mqtt.connector.msghandle;
 
 import java.net.InetSocketAddress;
 
@@ -8,12 +8,12 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandler;
-import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandlerContext;
-import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVMsgInterface;
+import com.hydrogen.mqtt.connector.car.House;
 
 public class AGVMessageHandle extends IoHandlerAdapter {
     private final Logger LOG = LoggerFactory.getLogger(AGVMessageHandle.class);
+    
+    private AbstractMsgHandlerFactory msgHandlerFactory;
 
 	private int idletime;
 	
@@ -41,7 +41,9 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
-		//House.removeCar((int)session.getAttribute("carid"));
+		if(null!=session.getAttribute("carid")) {
+			House.removeCar((int)session.getAttribute("carid"));
+		}
 		super.sessionClosed(session);
 		LOG.info("session has been closed...");
 	}
@@ -104,14 +106,14 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 	public AGVMsgInterface processPacket(final AGVMsgInterface packet,IoSession session) {
 		//处理消息
 		//否则，交给消息Handler去处理
-		int msgId = packet.msgCmd().getCmd();
-		AGVMsgHandler handler = AGVMsgHandlerContext.getHandler(msgId);
+		int msgId = packet.msgCmd();
+		AGVMsgHandlerInterface handler = msgHandlerFactory.getHandler(msgId);
 		if(null == handler){
 			LOG.error("未知消息，没有注册消息处理器");
 			return null;
 		} else {
 			//直接交给消息handler去处理
-			return handler.handler(packet,session);
+			return handler.process(packet,session);
 		}
 	}
 	
@@ -119,6 +121,11 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) {
 		LOG.info("其他方法抛出异常",cause);
+	}
+
+	public void register(AbstractMsgHandlerFactory msgHandlerFactory) {
+		this.msgHandlerFactory = msgHandlerFactory;
+		this.msgHandlerFactory.regHandler();
 	}
 
 }
