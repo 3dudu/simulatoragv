@@ -504,6 +504,8 @@ public class AGVCar implements Car {
 					continue;
 				}
 				StationPoint curpoint = routeList.poll();
+				LOG.info("car_" + id + ",move to curpoint:["+curpoint.getX()+","+curpoint.getY()+","+curpoint.getW()+"]");
+
 				setX(curpoint.getX());
 				setY(curpoint.getY());
 				setW(curpoint.getW());

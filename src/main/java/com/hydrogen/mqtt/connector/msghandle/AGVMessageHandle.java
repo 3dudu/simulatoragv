@@ -57,7 +57,7 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 	public void sessionIdle(IoSession session, IdleStatus status)
 			throws Exception {
 		LOG.warn("session idle, so disconnecting......");
-		session.close(false);
+		session.closeOnFlush();
         LOG.warn("disconnected.");
 	}
 	
@@ -79,7 +79,7 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 		String remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
 		LOG.info("session has opened...,IP:"+remoteAddress);
 		if(!checkIp(remoteAddress)) {
-			session.close(false);
+			session.closeNow();
 		}
 		int idleTime = getMaxIdleTime() / 2;
 		if (idleTime > 0) {

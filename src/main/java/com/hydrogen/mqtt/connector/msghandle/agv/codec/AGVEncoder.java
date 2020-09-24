@@ -32,6 +32,8 @@ public class AGVEncoder extends ProtocolEncoderAdapter {
 		if(body!=null && body.length!=0) {
 			buffer.putUnsignedShort(body.length);
 			buffer.put(body);
+		}else {
+			buffer.putUnsignedShort(0);
 		}
 		byte[] crcMsg = new byte[crc_msg_len];
 		System.arraycopy(buffer.array(), 0, crcMsg, 0, crc_msg_len);
