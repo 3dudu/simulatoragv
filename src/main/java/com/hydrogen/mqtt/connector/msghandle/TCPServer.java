@@ -107,19 +107,16 @@ public class TCPServer {
 		acceptor.getFilterChain().addLast("codec",new ProtocolCodecFilter(codecFactory));
 		// 线程池
 		acceptor.getFilterChain().addAfter("codec","threadPool", createExecutorFilter(codecThreads,"AGV TCP Server"));
-		
-		acceptor.getFilterChain().addAfter("threadPool","keepAliveFilter", keepAliveFilter);
-		
+		if(keepAliveFilter!=null) {
+			acceptor.getFilterChain().addAfter("threadPool","keepAliveFilter", keepAliveFilter);
+		}
 		acceptor.setHandler(handler);
 		acceptor.getSessionConfig().setReadBufferSize(1024);
 		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, timeout);
 		acceptor.bind(new InetSocketAddress(port));
-		
-
 	}
 	
     private ExecutorFilter createExecutorFilter(int eventThreads, final String threadName) {
-
         Executor executor = 
        	        new OrderedThreadPoolExecutor(eventThreads, eventThreads, 60, TimeUnit.SECONDS, new
        	        		RenamedThreadFactor(threadName, Executors.defaultThreadFactory()));

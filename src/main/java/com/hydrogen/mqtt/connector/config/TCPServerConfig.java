@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 import com.hydrogen.mqtt.connector.msghandle.AGVMessageHandle;
 import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
-import com.hydrogen.mqtt.connector.msghandle.TCPKeepAliveMessageFactory;
 import com.hydrogen.mqtt.connector.msghandle.TCPServer;
 import com.hydrogen.mqtt.connector.msghandle.agv.codec.AGVCodecFactory;
 import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandlerFactory;
@@ -23,7 +22,6 @@ public class TCPServerConfig {
 	
 	@Value("${tcpserver.port:0}")
 	private int port;
-	
 	
 	@Value("${tcpserver.heapBuffer:true}")
 	private boolean heapBuffer;
@@ -43,24 +41,16 @@ public class TCPServerConfig {
 	@Value("${tcpserver.white}")
 	private String[] white ;
 	
-	
 	@Bean("TCPServer")
-	public TCPServer getTCPServer(KeepAliveFilter keepAliveFilter,IoHandlerAdapter messageHandle) {
+	public TCPServer getTCPServer(IoHandlerAdapter messageHandle) {
 		TCPServer server = new TCPServer();
 		server.setPort(port);
-		server.setKeepAliveFilter(keepAliveFilter);
 		try {
 			server.start(protocolCodecFactory(),messageHandle);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return server;
-	}
-	
-	@Bean
-	public KeepAliveFilter keepAliveFilter() {
-		KeepAliveFilter kl = new KeepAliveFilter(new TCPKeepAliveMessageFactory(),org.apache.mina.core.session.IdleStatus.BOTH_IDLE);
-		return kl;
 	}
 	
 	@Bean
