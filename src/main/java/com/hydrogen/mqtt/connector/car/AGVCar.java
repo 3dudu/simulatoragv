@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 public class AGVCar {
     private final static Logger LOG = LoggerFactory.getLogger(AGVCar.class);
 
-	private static final int SPEED_1000 = 200;
-	private static final int SPEED = SPEED_1000/8;
+	private static int STEP_TIMEOUT = 200;
+	private static int STEP_SPEED = STEP_TIMEOUT/2;   // mm
 	private LinkedList<StationPoint> routeList = new LinkedList<StationPoint>();
 	private Thread worker;
 	private Object lock = new Object();
@@ -20,6 +20,10 @@ public class AGVCar {
 	private IoSession iosession;
 	private int id;
 	private int status;
+	public static void intSpeed(int step,int speed) {
+		STEP_TIMEOUT = step;
+		STEP_SPEED =  speed / (1000/step) ;
+	}
 	public IoSession getIosession() {
 		return iosession;
 	}
@@ -251,9 +255,9 @@ public class AGVCar {
 					setY(curpoint.getY());
 					setW(curpoint.getW());
 					setSpeed(curpoint.getSpeed());
-					int speed = SPEED_1000/2;
+					int speed = STEP_SPEED;
 					if(curpoint.getSpeed()==0x02) {
-						speed = SPEED_1000 * 7 /10;
+						speed = STEP_SPEED * 7 /10;
 					}
 					if (routeList.size() > 0) {
 						StationPoint nextpoint = routeList.peek();
@@ -277,7 +281,7 @@ public class AGVCar {
 									}
 									d_y -= speed;
 									try {
-										Thread.sleep(SPEED_1000);
+										Thread.sleep(STEP_TIMEOUT);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
@@ -306,7 +310,7 @@ public class AGVCar {
 									}
 									d_x -= speed;
 									try {
-										Thread.sleep(SPEED_1000);
+										Thread.sleep(STEP_TIMEOUT);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
@@ -317,7 +321,7 @@ public class AGVCar {
 					}
 				}
 				try {
-					Thread.sleep(SPEED_1000);
+					Thread.sleep(STEP_TIMEOUT);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

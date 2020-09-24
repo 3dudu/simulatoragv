@@ -11,6 +11,7 @@ import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVInfoRspMsg;
 
 public abstract class AGVMsgHandler<T extends AGVBaseMsg> implements AGVMsgHandlerInterface{
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public AGVMsgInterface process(AGVMsgInterface taskMsg, IoSession session) {
 		T msg = (T)taskMsg;

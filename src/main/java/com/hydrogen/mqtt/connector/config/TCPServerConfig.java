@@ -4,11 +4,11 @@ import java.io.IOException;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
-import org.apache.mina.filter.keepalive.KeepAliveFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.hydrogen.mqtt.connector.car.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.AGVMessageHandle;
 import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
 import com.hydrogen.mqtt.connector.msghandle.TCPServer;
@@ -41,8 +41,15 @@ public class TCPServerConfig {
 	@Value("${tcpserver.white}")
 	private String[] white ;
 	
+	@Value("${car.speed:500}")
+	private int speed ;
+	
+	@Value("${car.steptime:200}")
+	private int steptime ;
+	
 	@Bean("TCPServer")
 	public TCPServer getTCPServer(IoHandlerAdapter messageHandle) {
+		AGVCar.intSpeed(steptime,speed);
 		TCPServer server = new TCPServer();
 		server.setPort(port);
 		try {
