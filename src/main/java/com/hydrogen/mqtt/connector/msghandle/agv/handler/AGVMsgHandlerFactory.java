@@ -3,9 +3,9 @@ package com.hydrogen.mqtt.connector.msghandle.agv.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hydrogen.mqtt.connector.car.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.AGVMsgHandlerInterface;
 import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
+import com.hydrogen.mqtt.connector.msghandle.agv.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg;
 
 public class AGVMsgHandlerFactory extends AbstractMsgHandlerFactory{

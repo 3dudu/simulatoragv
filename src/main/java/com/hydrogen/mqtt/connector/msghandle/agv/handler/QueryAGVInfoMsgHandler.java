@@ -1,7 +1,7 @@
 package com.hydrogen.mqtt.connector.msghandle.agv.handler;
 
-import com.hydrogen.mqtt.connector.car.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg.CMD;
+import com.hydrogen.mqtt.connector.msghandle.agv.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVInfoRspMsg;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.QueryAGVInfoMsg;
 

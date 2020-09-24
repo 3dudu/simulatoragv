@@ -2,10 +2,10 @@ package com.hydrogen.mqtt.connector.msghandle.agv.handler;
 
 import org.apache.mina.core.session.IoSession;
 
-import com.hydrogen.mqtt.connector.car.AGVCar;
 import com.hydrogen.mqtt.connector.car.House;
 import com.hydrogen.mqtt.connector.msghandle.AGVMsgHandlerInterface;
 import com.hydrogen.mqtt.connector.msghandle.AGVMsgInterface;
+import com.hydrogen.mqtt.connector.msghandle.agv.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVInfoRspMsg;
 
@@ -34,7 +34,7 @@ public abstract class AGVMsgHandler<T extends AGVBaseMsg> implements AGVMsgHandl
 		if(carid!=0) {
 			session.setAttribute("carid", carid);
 		}
-		AGVCar car = House.getCar(carid);
+		AGVCar car = (AGVCar)House.getCar(carid);
 		if(car!=null) {
 			return car;
 		}

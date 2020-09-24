@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.hydrogen.mqtt.connector.car.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.AGVMessageHandle;
 import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
 import com.hydrogen.mqtt.connector.msghandle.TCPServer;
+import com.hydrogen.mqtt.connector.msghandle.agv.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.agv.codec.AGVCodecFactory;
 import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandlerFactory;
 

@@ -11,9 +11,9 @@ public class House {
 
 	private static AtomicInteger caridAtomic = new AtomicInteger();
 	
-    public static ConcurrentHashMap<Integer, AGVCar> carmap = new ConcurrentHashMap<Integer, AGVCar>();
+    public static ConcurrentHashMap<Integer, Car> carmap = new ConcurrentHashMap<Integer, Car>();
 
-    public static int addCar(AGVCar car) {
+    public static int addCar(Car car) {
     	int carid = car.getId();
     	LOG.info("car :"+carid+" work!");
     	carmap.put(carid, car);
@@ -21,13 +21,13 @@ public class House {
     }
     
     public static void removeCar(int carid) {
-    	AGVCar car = carmap.remove(carid);
+    	Car car = carmap.remove(carid);
     	caridAtomic.getAndDecrement();
     	LOG.info("car :"+carid+" stop!");
     	car.close();
     }
 
-	public static AGVCar getCar(int carid) {
+	public static Car getCar(int carid) {
 		return carmap.get(carid);
 	}
     

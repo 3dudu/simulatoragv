@@ -1,4 +1,4 @@
-package com.hydrogen.mqtt.connector.car;
+package com.hydrogen.mqtt.connector.msghandle.agv;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -7,7 +7,10 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AGVCar {
+import com.hydrogen.mqtt.connector.car.Car;
+import com.hydrogen.mqtt.connector.car.StationPoint;
+
+public class AGVCar implements Car{
     private final static Logger LOG = LoggerFactory.getLogger(AGVCar.class);
 
 	private static int STEP_TIMEOUT = 200;
