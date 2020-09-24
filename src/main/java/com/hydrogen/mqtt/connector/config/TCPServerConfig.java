@@ -1,16 +1,14 @@
 package com.hydrogen.mqtt.connector.config;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.hydrogen.mqtt.connector.car.House;
 import com.hydrogen.mqtt.connector.msghandle.AGVMessageHandle;
 import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
 import com.hydrogen.mqtt.connector.msghandle.TCPServer;
@@ -53,6 +51,13 @@ public class TCPServerConfig {
 	@Bean("TCPServer")
 	public TCPServer getTCPServer(IoHandlerAdapter messageHandle) {
 		AGVCar.intSpeed(steptime, speed);
+		//热车
+		AGVCar car = new AGVCar();
+    	car.setId(0);
+		House.addCar(car);
+		car.init();
+		car.start();
+		
 		TCPServer server = new TCPServer();
 		server.setPort(port);
 		try {
@@ -70,7 +75,7 @@ public class TCPServerConfig {
 
 	@Bean("msgHandlerFactory")
 	public AbstractMsgHandlerFactory msgHandlerFactory() {
-		return new AGVMsgHandlerFactory(taskExecutor());
+		return new AGVMsgHandlerFactory();
 	}
 
 	@Bean("messageHandle")
@@ -80,23 +85,4 @@ public class TCPServerConfig {
 		return handler;
 	}
 
-	@Bean
-	public TaskExecutor taskExecutor() {
-		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		// 设置核心线程数
-		executor.setCorePoolSize(5);
-		// 设置最大线程数
-		executor.setMaxPoolSize(10);
-		// 设置队列容量
-		executor.setQueueCapacity(20);
-		// 设置线程活跃时间（秒）
-		executor.setKeepAliveSeconds(60);
-		// 设置默认线程名称
-		executor.setThreadNamePrefix("car-driver-");
-		// 设置拒绝策略
-		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-		// 等待所有任务结束后再关闭线程池
-		executor.setWaitForTasksToCompleteOnShutdown(true);
-		return executor;
-	}
 }

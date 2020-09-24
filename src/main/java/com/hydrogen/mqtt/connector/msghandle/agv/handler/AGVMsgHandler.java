@@ -1,7 +1,6 @@
 package com.hydrogen.mqtt.connector.msghandle.agv.handler;
 
 import org.apache.mina.core.session.IoSession;
-import org.springframework.core.task.TaskExecutor;
 
 import com.hydrogen.mqtt.connector.car.House;
 import com.hydrogen.mqtt.connector.msghandle.AGVMsgHandlerInterface;
@@ -11,35 +10,14 @@ import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVInfoRspMsg;
 
 public abstract class AGVMsgHandler<T extends AGVBaseMsg> implements AGVMsgHandlerInterface{
-	private TaskExecutor taskExecutor;
-	
-	public TaskExecutor getTaskExecutor() {
-		return taskExecutor;
-	}
-
-	public void setTaskExecutor(TaskExecutor taskExecutor) {
-		this.taskExecutor = taskExecutor;
-	}
-	
-	public AGVMsgHandler(TaskExecutor taskExecutor) {
-		this.taskExecutor = taskExecutor;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public AGVMsgInterface process(AGVMsgInterface taskMsg, IoSession session) {
 		T msg = (T)taskMsg;
 		AGVInfoRspMsg rsp = new AGVInfoRspMsg(msg.getMsgseq());
 		AGVCar car = initCar(msg,session);
-		
 		//改为异步操作车子
-		taskExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				handler(msg,car);
-			}
-		});
-		
+		handler(msg,car);
 		return getCarInfo(rsp,car);
 	}
 	
@@ -60,6 +38,7 @@ public abstract class AGVMsgHandler<T extends AGVBaseMsg> implements AGVMsgHandl
     	car.setId(carid);
 		House.addCar(car);
 		car.init();
+		car.start();
 		return car;
 	}
 

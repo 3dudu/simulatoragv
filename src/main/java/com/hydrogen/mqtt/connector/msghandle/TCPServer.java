@@ -104,7 +104,7 @@ public class TCPServer {
         IoAcceptor acceptor = new NioSocketAcceptor(processor);
 
         acceptor.getFilterChain().addLast("logger",new LoggingFilter());
-		acceptor.getFilterChain().addLast("codec",new ProtocolCodecFilter(codecFactory));
+		acceptor.getFilterChain().addAfter("logger","codec",new ProtocolCodecFilter(codecFactory));
 		// 线程池
 		acceptor.getFilterChain().addAfter("codec","threadPool", createExecutorFilter(codecThreads,"AGV TCP Server"));
 		if(keepAliveFilter!=null) {

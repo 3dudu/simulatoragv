@@ -2,7 +2,6 @@ package com.hydrogen.mqtt.connector.msghandle.agv.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.task.TaskExecutor;
 
 import com.hydrogen.mqtt.connector.msghandle.AGVMsgHandlerInterface;
 import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
@@ -14,28 +13,22 @@ public class AGVMsgHandlerFactory extends AbstractMsgHandlerFactory{
 	
 	public static AGVMsgHandler<AGVBaseMsg> defaultHandler;
 
-	private TaskExecutor taskExecutor;
-	
-	public AGVMsgHandlerFactory(TaskExecutor taskExecutor) {
-		this.taskExecutor = taskExecutor;
-	}
-
 	@Override
 	public void regHandler() {
-		QueryAGVInfoMsgHandler queryAGVInfoMsgHandler = new QueryAGVInfoMsgHandler(taskExecutor);
+		QueryAGVInfoMsgHandler queryAGVInfoMsgHandler = new QueryAGVInfoMsgHandler();
 		putHandler(queryAGVInfoMsgHandler);
 		
-		RoutReqHandler routReqHandler = new RoutReqHandler(taskExecutor);
+		RoutReqHandler routReqHandler = new RoutReqHandler();
 		putHandler(routReqHandler);
 		
-		TaskReqHabdler taskReqHabdler = new TaskReqHabdler(taskExecutor);
+		TaskReqHabdler taskReqHabdler = new TaskReqHabdler();
 		putHandler(taskReqHabdler);		
 	}
 
 	@Override
 	public AGVMsgHandlerInterface defaultHandler() {
 		if(defaultHandler==null) {
-			defaultHandler = new AGVMsgHandler<AGVBaseMsg>(taskExecutor) {
+			defaultHandler = new AGVMsgHandler<AGVBaseMsg>() {
 				@Override
 				public int getHandlerId() {
 					return 0;
