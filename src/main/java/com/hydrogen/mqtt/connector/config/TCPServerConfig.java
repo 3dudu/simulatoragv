@@ -2,19 +2,24 @@ package com.hydrogen.mqtt.connector.config;
 
 import java.io.IOException;
 
+import javax.annotation.Resource;
+
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.hydrogen.mqtt.connector.TCPServer;
 import com.hydrogen.mqtt.connector.car.House;
 import com.hydrogen.mqtt.connector.msghandle.AGVMessageHandle;
 import com.hydrogen.mqtt.connector.msghandle.AbstractMsgHandlerFactory;
-import com.hydrogen.mqtt.connector.msghandle.TCPServer;
+import com.hydrogen.mqtt.connector.msghandle.MinaTCPServer;
 import com.hydrogen.mqtt.connector.msghandle.agv.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.agv.codec.AGVCodecFactory;
 import com.hydrogen.mqtt.connector.msghandle.agv.handler.AGVMsgHandlerFactory;
+import com.hydrogen.mqtt.connector.nettyserver.NettyConfig;
+import com.hydrogen.mqtt.connector.nettyserver.ServerChannelHandlerAdapter;
 
 @Configuration
 public class TCPServerConfig {
@@ -47,6 +52,9 @@ public class TCPServerConfig {
 
 	@Value("${car.steptime:200}")
 	private int steptime;
+	
+	@Resource
+	private NettyConfig nettyConfig;
 
 	@Bean("TCPServer")
 	public TCPServer getTCPServer(IoHandlerAdapter messageHandle) {
@@ -58,14 +66,31 @@ public class TCPServerConfig {
 		car.init();
 		car.start();
 		
-		TCPServer server = new TCPServer();
+		
+		MinaTCPServer server = new MinaTCPServer();
+		server.setCodecFactory(protocolCodecFactory());
+		server.setHandler(messageHandle);
 		server.setPort(port);
 		try {
-			server.start(protocolCodecFactory(), messageHandle);
+			server.start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		/*
+		nettyConfig.setPort(port);
+		NettyServer server2 = new NettyServer();
+		server2.setNettyConfig(nettyConfig);
+		server2.setChannelHandlerAdapter(serverChannelHandlerAdapter());
+		server2.start();
+		*/
 		return server;
+	}
+	
+	@Bean
+	public ServerChannelHandlerAdapter serverChannelHandlerAdapter() {
+		ServerChannelHandlerAdapter handler = new ServerChannelHandlerAdapter();
+		handler.register(msgHandlerFactory());
+		return handler;
 	}
 
 	@Bean

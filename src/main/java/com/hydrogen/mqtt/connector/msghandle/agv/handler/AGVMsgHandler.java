@@ -9,26 +9,41 @@ import com.hydrogen.mqtt.connector.msghandle.agv.AGVCar;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVBaseMsg;
 import com.hydrogen.mqtt.connector.msghandle.agv.msg.AGVInfoRspMsg;
 
+import io.netty.channel.ChannelHandlerContext;
+
 public abstract class AGVMsgHandler<T extends AGVBaseMsg> implements AGVMsgHandlerInterface{
 	@SuppressWarnings("unchecked")
 	@Override
 	public AGVMsgInterface process(AGVMsgInterface taskMsg, IoSession session) {
 		T msg = (T)taskMsg;
 		AGVInfoRspMsg rsp = new AGVInfoRspMsg(msg.getMsgseq());
-		AGVCar car = initCar(msg,session);
+		AGVCar car = initCar(msg);
+		if(car.getId()!=0) {
+			session.setAttribute("carid", car.getId());
+		}
 		//改为异步操作车子
 		handler(msg,car);
 		return getCarInfo(rsp,car);
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public AGVMsgInterface process(AGVMsgInterface taskMsg, ChannelHandlerContext ctx) {
+		T msg = (T)taskMsg;
+		AGVInfoRspMsg rsp = new AGVInfoRspMsg(msg.getMsgseq());
+		AGVCar car = initCar(msg);
+		//改为异步操作车子
+		handler(msg,car);
+		return getCarInfo(rsp,car);
+	}
+	
+	
 	public abstract AGVBaseMsg handler(T italkmsg,AGVCar car);
 
 	
-	public AGVCar initCar(AGVBaseMsg italkmsg,IoSession session) {
+	public AGVCar initCar(AGVBaseMsg italkmsg) {
 		int carid = italkmsg.agvid();
-		if(carid!=0) {
-			session.setAttribute("carid", carid);
-		}
+	
 		AGVCar car = (AGVCar)House.getCar(carid);
 		if(car!=null) {
 			return car;

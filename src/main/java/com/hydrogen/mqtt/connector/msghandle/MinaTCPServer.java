@@ -24,7 +24,9 @@ import org.apache.mina.transport.socket.nio.NioProcessor;
 import org.apache.mina.transport.socket.nio.NioSession;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
-public class TCPServer {
+import com.hydrogen.mqtt.connector.TCPServer;
+
+public class MinaTCPServer implements TCPServer{
 	private static int THREAD_NUM = Runtime.getRuntime().availableProcessors()+1;
 	private int processorThreads = THREAD_NUM;
 	private int codecThreads = THREAD_NUM;
@@ -90,8 +92,29 @@ public class TCPServer {
 	public void setKeepAliveFilter(KeepAliveFilter keepAliveFilter) {
 		this.keepAliveFilter = keepAliveFilter;
 	}
+	
+	private ProtocolCodecFactory codecFactory;
+	
+	public ProtocolCodecFactory getCodecFactory() {
+		return codecFactory;
+	}
 
-	public void start(ProtocolCodecFactory codecFactory,IoHandlerAdapter handler) throws IOException{
+	public void setCodecFactory(ProtocolCodecFactory codecFactory) {
+		this.codecFactory = codecFactory;
+	}
+
+	public IoHandlerAdapter getHandler() {
+		return handler;
+	}
+
+	public void setHandler(IoHandlerAdapter handler) {
+		this.handler = handler;
+	}
+
+
+	private IoHandlerAdapter handler;
+	
+	public void start() throws IOException{
         //是否使用直接缓冲区，比直接缓存区快50%。待测试验证
         if (heapBuffer) {
             IoBuffer.setUseDirectBuffer(false);
@@ -110,7 +133,9 @@ public class TCPServer {
 		if(keepAliveFilter!=null) {
 			acceptor.getFilterChain().addAfter("threadPool","keepAliveFilter", keepAliveFilter);
 		}
-		acceptor.setHandler(handler);
+		if(handler!=null) {
+			acceptor.setHandler(handler);
+		}
 		acceptor.getSessionConfig().setReadBufferSize(1024);
 		acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, timeout);
 		acceptor.bind(new InetSocketAddress(port));
