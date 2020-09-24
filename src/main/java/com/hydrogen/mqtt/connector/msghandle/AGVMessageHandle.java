@@ -93,7 +93,7 @@ public class AGVMessageHandle extends IoHandlerAdapter {
 			throws Exception {
 		String remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
 	    session.setAttribute("ip", remoteAddress);
-		if(obj instanceof AGVMsgInterface) {
+		if(obj != null && obj instanceof AGVMsgInterface) {
 			AGVMsgInterface msg = (AGVMsgInterface) obj;
 			LOG.debug("rec from "+session.getAttribute("ip")+",msg:"+msg.msgCmd());
 			AGVMsgInterface message = processPacket(msg,session);

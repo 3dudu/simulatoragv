@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import com.hydrogen.mqtt.connector.car.Car;
 import com.hydrogen.mqtt.connector.car.StationPoint;
 
-public class AGVCar implements Car{
-    private final static Logger LOG = LoggerFactory.getLogger(AGVCar.class);
+public class AGVCar implements Car {
+	private final static Logger LOG = LoggerFactory.getLogger(AGVCar.class);
 
 	private static int STEP_TIMEOUT = 200;
-	private static int STEP_SPEED = STEP_TIMEOUT/2;   // mm
+	private static int STEP_SPEED = STEP_TIMEOUT / 2; // mm
 	private LinkedList<StationPoint> routeList = new LinkedList<StationPoint>();
 	private Thread worker;
 	private Object lock = new Object();
@@ -23,104 +23,137 @@ public class AGVCar implements Car{
 	private IoSession iosession;
 	private int id;
 	private int status;
-	public static void intSpeed(int step,int speed) {
+
+	public static void intSpeed(int step, int speed) {
 		STEP_TIMEOUT = step;
-		STEP_SPEED =  speed / (1000/step) ;
+		STEP_SPEED = speed / (1000 / step);
 	}
+
 	public IoSession getIosession() {
 		return iosession;
 	}
+
 	public void setIosession(IoSession iosession) {
 		this.iosession = iosession;
 	}
+
 	public int getId() {
 		return id;
 	}
+
 	public void setId(int id) {
 		this.id = id;
 	}
+
 	private int taskComplete;
 	private int taskRedo;
 	private int x;
 	private int y;
+
 	public LinkedList<StationPoint> getRouteList() {
 		return routeList;
 	}
+
 	public void setRouteList(LinkedList<StationPoint> routeList) {
 		this.routeList = routeList;
 	}
+
 	public int getStatus() {
 		return status;
 	}
+
 	public void setStatus(int status) {
 		this.status = status;
 	}
+
 	public int getTaskComplete() {
 		return taskComplete;
 	}
+
 	public void setTaskComplete(int taskComplete) {
 		this.taskComplete = taskComplete;
 	}
+
 	public int getTaskRedo() {
 		return taskRedo;
 	}
+
 	public void setTaskRedo(int taskRedo) {
 		this.taskRedo = taskRedo;
 	}
+
 	public int getX() {
 		return x;
 	}
+
 	public void setX(int x) {
 		this.x = x;
 	}
+
 	public int getY() {
 		return y;
 	}
+
 	public void setY(int y) {
 		this.y = y;
 	}
+
 	public int getW() {
 		return w;
 	}
+
 	public void setW(int w) {
 		this.w = w;
 	}
+
 	public int getOnTop() {
 		return onTop;
 	}
+
 	public void setOnTop(int onTop) {
 		this.onTop = onTop;
 	}
+
 	public int getFlip() {
 		return flip;
 	}
+
 	public void setFlip(int flip) {
 		this.flip = flip;
 	}
+
 	public int getHand() {
 		return hand;
 	}
+
 	public void setHand(int hand) {
 		this.hand = hand;
 	}
+
 	public int getPower() {
 		return power;
 	}
+
 	public void setPower(int power) {
 		this.power = power;
 	}
+
 	public int getSpeed() {
 		return speed;
 	}
+
 	public void setSpeed(int speed) {
 		this.speed = speed;
 	}
+
 	public int getAlarmLength() {
 		return alarmLength;
 	}
+
 	public void setAlarmLength(int alarmLength) {
 		this.alarmLength = alarmLength;
 	}
+
 	private int w;
 	private int onTop;
 	private int flip;
@@ -128,6 +161,7 @@ public class AGVCar implements Car{
 	private int power;
 	private int speed;
 	private int alarmLength;
+
 	public void init() {
 		setStatus(0x00);
 		setTaskComplete(0x00);
@@ -140,77 +174,78 @@ public class AGVCar implements Car{
 		setHand(0x01);
 		setPower(98);
 		setSpeed(0x01);
-		setAlarmLength(0x00);	
-		taskStatus=0x04;
+		setAlarmLength(0x00);
+		taskStatus = 0x04;
 
-		worker = new CarWorkThread("Car-"+id);	
+		worker = new CarWorkThread("Car-" + id);
 		worker.start();
 	}
-	
+
 	public void addRoute(List<StationPoint> routeList) {
+		setStatus(0x01);
+		this.taskStatus = 0x04;
 		synchronized (lock) {
-			setStatus(0x01);
+			LOG.info("car_" + id + ",recive new routelist!");
 			this.routeList.clear();
 			this.routeList.addAll(routeList);
-			LOG.info("car_"+id+",recive new routelist!");
 			lock.notify();
 		}
 	}
-	
+
 	public void start() {
+		setStatus(0x01);
+		this.taskStatus = 0x04;
 		synchronized (lock) {
-			setStatus(0x01);
-			//testdata();
 			lock.notify();
 		}
 	}
-	
+
 	public void close() {
+		isClose = 1;
+		LOG.info("car_" + id + ",stop task!");
 		synchronized (lock) {
-			isClose = 1;
 			routeList.clear();
-			LOG.info("car_"+id+",stop task!");
 			lock.notify();
 		}
 		worker.interrupt();
 	}
-	
+
 	public void changeTask(int taskStatus) {
-		if(taskStatus==0x03) {
+		if (taskStatus == 0x03) {
 			this.taskStatus = taskStatus;
 			setStatus(0x03);
-			LOG.info("car_"+id+",pause task!");
-		}else if(taskStatus==0x04) {
-			synchronized (lock) {
-				if(this.taskStatus==0x03) {
-					this.taskStatus = taskStatus;
-					setStatus(0x01);
-					LOG.info("car_"+id+",go on task!");
+			LOG.info("car_" + id + ",pause task!");
+		} else if (taskStatus == 0x04) {
+			if (this.taskStatus == 0x03) {
+				this.taskStatus = taskStatus;
+				setStatus(0x01);
+				LOG.info("car_" + id + ",go on task!");
+				synchronized (lock) {
 					lock.notify();
-				}else{
-					this.taskStatus = taskStatus;
-					setStatus(0x01);
+				}
+			} else {
+				this.taskStatus = taskStatus;
+				setStatus(0x01);
+				synchronized (lock) {
 					routeList.clear();
-					//testdata();
 					lock.notify();
 				}
 			}
-		}else if(taskStatus==0x05){
+		} else if (taskStatus == 0x05) {
 			this.taskStatus = taskStatus;
 			setStatus(0x00);
+			LOG.info("car_" + id + ",stop task!");
 			synchronized (lock) {
 				routeList.clear();
-				LOG.info("car_"+id+",stop task!");
 				lock.notify();
 			}
 		}
-		
 	}
-	
+
 	public void testdata() {
 		int x = this.id * 10000;
-		int y =  this.id * 2000;
-		for(int i=0;i<20;i++) {
+		int y = this.id * 2000;
+		for (int i = 0; i < 20; i++) {
 			x += 1000;
 			StationPoint e = new StationPoint();
 			e.setX(x);
@@ -221,7 +256,7 @@ public class AGVCar implements Car{
 			e.setRuntype(0x02);
 			routeList.add(e);
 		}
-		for(int i=0;i<20;i++) {
+		for (int i = 0; i < 20; i++) {
 			y += 1000;
 			StationPoint e = new StationPoint();
 			e.setX(x);
@@ -234,102 +269,118 @@ public class AGVCar implements Car{
 		}
 	}
 
-	class CarWorkThread extends Thread{
-	   public CarWorkThread(String name){    
-	        super( name );
-	    }
+	class CarWorkThread extends Thread {
+		public CarWorkThread(String name) {
+			super(name);
+		}
+
 		@Override
 		public void run() {
 			while (isClose == 0) {
 				synchronized (lock) {
 					if (routeList.size() == 0) {
-						LOG.info("car_"+id+",routeList empty,stop task!");
+						LOG.info("car_" + id + ",routeList empty,stop task!");
 						setStatus(0x00);
 						try {
 							lock.wait();
-							continue;
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-					}
-
-					StationPoint curpoint = routeList.poll();
-					setX(curpoint.getX());
-					setY(curpoint.getY());
-					setW(curpoint.getW());
-					setSpeed(curpoint.getSpeed());
-					int speed = STEP_SPEED;
-					if(curpoint.getSpeed()==0x02) {
-						speed = STEP_SPEED * 7 /10;
-					}
-					if (routeList.size() > 0) {
-						StationPoint nextpoint = routeList.peek();
-						if ( Math.abs(curpoint.getX() - nextpoint.getX())<100) {
-							int d_y = nextpoint.getY() - curpoint.getY();
-							d_y = Math.abs(d_y);
-							//if (d_y > SPEED*4) {
-								while (d_y > speed) {
-									if (taskStatus == 3) {
-										try {
-											lock.wait();
-											continue;
-										} catch (InterruptedException e) {
-											e.printStackTrace();
-										}
-									}
-									if (nextpoint.getY() > curpoint.getY()) {
-										setY(getY() + speed);
-									} else {
-										setY(getY() - speed);
-									}
-									d_y -= speed;
-									try {
-										Thread.sleep(STEP_TIMEOUT);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
-								}
-								continue;
-							//}
-
-						//} else if ( Math.abs(curpoint.getY() - nextpoint.getY())<100 ) {
-						}else {
-							int d_x = nextpoint.getX() - curpoint.getX();
-							d_x = Math.abs(d_x);
-							//if (d_x > SPEED*4) {
-								while (d_x > speed) {
-									if (taskStatus == 3) {
-										try {
-											lock.wait();
-											continue;
-										} catch (InterruptedException e) {
-											e.printStackTrace();
-										}
-									}
-									if (nextpoint.getX() > curpoint.getX()) {
-										setX(getX() + speed);
-									} else {
-										setX(getX() - speed);
-									}
-									d_x -= speed;
-									try {
-										Thread.sleep(STEP_TIMEOUT);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
-								}
-								continue;
-							//}
-						}
+						continue;
 					}
 				}
-				try {
-					Thread.sleep(STEP_TIMEOUT);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				StationPoint curpoint;
+				synchronized (lock) {
+					curpoint = routeList.poll();
+				}
+				setX(curpoint.getX());
+				setY(curpoint.getY());
+				setW(curpoint.getW());
+				setSpeed(curpoint.getSpeed());
+				int speed = STEP_SPEED;
+				if (curpoint.getSpeed() == 0x02) {
+					speed = STEP_SPEED * 7 / 10;
+				}
+				StationPoint nextpoint = null;
+				synchronized (lock) {
+					if (routeList.size() > 0) {
+						nextpoint = routeList.peek();
+					}
+				}
+				if (nextpoint != null) {
+					if (Math.abs(curpoint.getX() - nextpoint.getX()) < 100) {
+						int d_y = nextpoint.getY() - curpoint.getY();
+						d_y = Math.abs(d_y);
+						// if (d_y > SPEED*4) {
+						while (d_y > speed) {
+							if (taskStatus == 3 || taskStatus == 5) {
+								try {
+									synchronized (lock) {
+										lock.wait();
+									}
+									if (taskStatus != 4) {
+										break;
+									}
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							if (nextpoint.getY() > curpoint.getY()) {
+								setY(getY() + speed);
+							} else {
+								setY(getY() - speed);
+							}
+							d_y -= speed;
+							try {
+								Thread.sleep(STEP_TIMEOUT);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						continue;
+						// }
+
+						// } else if ( Math.abs(curpoint.getY() - nextpoint.getY())<100 ) {
+					} else {
+						int d_x = nextpoint.getX() - curpoint.getX();
+						d_x = Math.abs(d_x);
+						// if (d_x > SPEED*4) {
+						while (d_x > speed) {
+							if (taskStatus == 3 || taskStatus == 5) {
+								try {
+									synchronized (lock) {
+										lock.wait();
+									}
+									if (taskStatus != 4) {
+										break;
+									}
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							if (nextpoint.getX() > curpoint.getX()) {
+								setX(getX() + speed);
+							} else {
+								setX(getX() - speed);
+							}
+							d_x -= speed;
+							try {
+								Thread.sleep(STEP_TIMEOUT);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						continue;
+						// }
+					}
 				}
 			}
-
+			try {
+				Thread.sleep(STEP_TIMEOUT);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+
 	}
 }
