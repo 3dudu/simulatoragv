@@ -426,6 +426,49 @@ public class AGVCar implements Car {
 			if (curpoint.getSpeed() == 0x02) {
 				speed = STEP_SPEED * 7 / 10;
 			}
+			double dis_x = (double)Math.abs(curpoint.getX() - nextpoint.getX());
+			double dis_y = (double)Math.abs(curpoint.getY() - nextpoint.getY());
+
+			double distaion = Math.sqrt(Math.pow(dis_x, 2) +  Math.pow(dis_y, 2));
+			int _y = (int)(dis_y*speed/distaion);
+			int _x = (int)(dis_x*speed/distaion);
+			while (distaion > speed) {
+				if (taskStatus == 3 || taskStatus == 5) {
+					try {
+						synchronized (lock) {
+							lock.wait();
+						}
+						if (taskStatus != 4) {
+							break;
+						}
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				if(dis_y>0) {
+					if (nextpoint.getY() > curpoint.getY()) {
+						setY(getY() + _y);
+					} else {
+						setY(getY() - _y);
+					}
+				}
+				if(dis_x>0) {
+					if (nextpoint.getX() > curpoint.getX()) {
+						setX(getX() + _x);
+					} else {
+						setX(getX() - _x);
+					}
+				}
+				driverLength += speed;
+				distaion -= speed;
+				try {
+					Thread.sleep(STEP_TIMEOUT);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			/*
 			if (Math.abs(curpoint.getX() - nextpoint.getX()) < 100) {
 				int d_y = nextpoint.getY() - curpoint.getY();
 				d_y = Math.abs(d_y);
@@ -485,7 +528,7 @@ public class AGVCar implements Car {
 					}
 				}
 			}
-
+*/
 		}
 
 		@Override
