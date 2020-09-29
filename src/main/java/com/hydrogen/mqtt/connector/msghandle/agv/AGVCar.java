@@ -254,14 +254,15 @@ public class AGVCar implements Car {
 			LOG.info("car_" + id + ",pause task!");
 		} else if (taskStatus == 0x04) {
 			setIsCharge(0);
-			if (this.taskStatus == 0x03) {
+			//if (this.taskStatus == 0x03) {
 				this.taskStatus = taskStatus;
 				setStatus(0x01);
 				LOG.info("car_" + id + ",go on task!");
 				synchronized (lock) {
 					lock.notify();
 				}
-			}/* else {
+			//}
+				/* else {
 				this.taskStatus = taskStatus;
 				setStatus(0x01);
 				routeList.clear();
@@ -275,9 +276,9 @@ public class AGVCar implements Car {
 			setStatus(0x00);
 			LOG.info("car_" + id + ",stop task!");
 			routeList.clear();
-			synchronized (lock) {
-				lock.notify();
-			}
+			//synchronized (lock) {
+			//	lock.notify();
+			//}
 		}
 	}
 
