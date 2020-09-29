@@ -188,7 +188,7 @@ public class AGVCar implements Car {
 	private int alarmLength;
 
 	public void init() {
-		setStatus(0x00);
+		setStatus(0x01);
 		setTaskComplete(0x00);
 		setTaskRedo(0x00);
 		setX(1200);
@@ -261,14 +261,14 @@ public class AGVCar implements Car {
 				synchronized (lock) {
 					lock.notify();
 				}
-			} else {
+			}/* else {
 				this.taskStatus = taskStatus;
 				setStatus(0x01);
 				routeList.clear();
 				synchronized (lock) {
 					lock.notify();
 				}
-			}
+			}*/
 		} else if (taskStatus == 0x05) {
 			setIsCharge(0);
 			this.taskStatus = taskStatus;
@@ -536,7 +536,7 @@ public class AGVCar implements Car {
 			while (isClose == 0) {
 				if (routeList.isEmpty()) {
 					LOG.info("car_" + id + ",routeList empty,stop task!");
-					setStatus(0x00);
+					setStatus(0x02);
 					try {
 						synchronized (lock) {
 							lock.wait();
